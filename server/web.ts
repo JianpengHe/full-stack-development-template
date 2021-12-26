@@ -202,7 +202,7 @@ class CB extends URL {
   }
 }
 export type rawObject = { [x: string]: any } | any[]
-export type routeCallbackRetrun = string | rawObject | null | void
+export type routeCallbackRetrun = string | rawObject | null | undefined
 export type routeCallbackFn = (cb: CB, req: http.IncomingMessage, res: http.ServerResponse) => Promise<routeCallbackRetrun>
 export type webOpts = {
   api?: Map<string, routeCallbackFn>

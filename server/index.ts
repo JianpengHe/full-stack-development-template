@@ -17,7 +17,6 @@ web.route({
         console.log(recvMsg)
         websocket.send('收到' + recvMsg)
       }
-      // console.log()
       return 'websocket close'
     }
     return 'Please use the websocket protocol.'
@@ -26,12 +25,14 @@ web.route({
     return cb.query
   },
   async hello(cb) {
-    return cb.cookie['trace-branch']
+    /** 若没有值需要返回，可以返回空对象或null，因为判断依据是typeof是否为object */
+    return {}
   },
   async post(cb) {
     return cb.form
   },
   async xxt(cb) {
+    /** body允许直接传入一个对象，将格式化成表单post到对方服务器 */
     return {
       data: await cb.ajax(
         'http://passport2.chaoxing.com/login',
@@ -49,11 +50,21 @@ web.route({
     )
   },
   async stream(cb, req, res) {
-    //  cb.ajax("http://127.0.0.1", fs.createReadStream("index.js"))
+
+    /** body允许为可读流，则向对方服务器上传数据 */
+    // cb.ajax("http://127.0.0.1", fs.createReadStream("index.js"))
+
+    /** 也可以指定一个可写流，当数据接收完毕promise将被解决，返回数据大小 */
     // cb.ajax("https://static.nfuca.com/plmm.jpg",undefined,{writeStream:fs.createWriteStream("plmm.jpg")})
     res.setHeader("content-type", "image/jpeg")
     cb.ajax("https://static.nfuca.com/plmm.jpg", undefined, { writeStream: res })
 
-    return
+    /** 若return undefined，则不做任何处理，需要我们自行res.end */
+    return undefined
+  },
+  async baidu(cb) {
+    /** 若指定状态码为3xx 则location到return的值 */
+    cb.res.statusCode = 302;
+    return "https://www.baidu.com"
   }
 })
