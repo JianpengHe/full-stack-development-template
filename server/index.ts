@@ -48,11 +48,11 @@ web.route({
       'https://piaofang.maoyan.com/dashboard-ajax?orderType&uuid&User-Agent&index&channelId&sVersion&signKey'
     )
   },
-  async stream(cb) {
+  async stream(cb, req, res) {
     //  cb.ajax("http://127.0.0.1", fs.createReadStream("index.js"))
     // cb.ajax("https://static.nfuca.com/plmm.jpg",undefined,{writeStream:fs.createWriteStream("plmm.jpg")})
-    cb.res.setHeader("content-type", "image/jpeg")
-    cb.ajax("https://static.nfuca.com/plmm.jpg", undefined, { writeStream: cb.res })
+    res.setHeader("content-type", "image/jpeg")
+    cb.ajax("https://static.nfuca.com/plmm.jpg", undefined, { writeStream: res })
 
     return
   }

@@ -203,8 +203,9 @@ class CB extends URL {
 }
 export type rawObject = { [x: string]: any } | any[]
 export type routeCallbackRetrun = string | rawObject | null | void
+export type routeCallbackFn = (cb: CB, req: http.IncomingMessage, res: http.ServerResponse) => Promise<routeCallbackRetrun>
 export type webOpts = {
-  api?: Map<string, (cb: CB) => Promise<routeCallbackRetrun>>
+  api?: Map<string, routeCallbackFn>
   timeout?: number
   port?: number
   rootDir?: string
@@ -214,7 +215,7 @@ export type webOpts = {
   sessionLife?: number
 }
 export default class Web {
-  public api: Map<string, (cb: CB) => Promise<routeCallbackRetrun>>
+  public api: Map<string, routeCallbackFn>
   public timeout: number
   public port: number
   public rootDir: string
@@ -236,7 +237,7 @@ export default class Web {
     this.httpServer.on('request', (req: http.IncomingMessage, res: http.ServerResponse) => this.request(req, res))
     this.api = opts.api ?? new Map()
   }
-  public route(route: { [x: string]: (cb: CB) => Promise<routeCallbackRetrun> }) {
+  public route(route: { [x: string]: routeCallbackFn }) {
     Object.entries(route).forEach(([path, cb]) => this.api.set(path, cb))
     return this
   }
@@ -255,7 +256,7 @@ export default class Web {
         return
       }
       res.setHeader('content-type', 'application/json')
-      const result = await this.api.get(route)?.call(this, cb)
+      const result = await this.api.get(route)?.call(this, cb, req, res)
       if (res.writableEnded) {
         return
       }
