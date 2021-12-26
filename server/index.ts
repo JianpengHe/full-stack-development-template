@@ -1,5 +1,6 @@
 import ws, { messageType } from './ws'
 import Web from './web'
+import * as fs from 'fs'
 const web = new Web()
 web.route({
   async websocket(cb) {
@@ -38,8 +39,7 @@ web.route({
           uname: 'MTEx',
           password: 'MTEx',
           numcode: 1111,
-        },
-        { json: false }
+        }
       ),
     }
   },
@@ -48,4 +48,12 @@ web.route({
       'https://piaofang.maoyan.com/dashboard-ajax?orderType&uuid&User-Agent&index&channelId&sVersion&signKey'
     )
   },
+  async stream(cb) {
+    //  cb.ajax("http://127.0.0.1", fs.createReadStream("index.js"))
+    // cb.ajax("https://static.nfuca.com/plmm.jpg",undefined,{writeStream:fs.createWriteStream("plmm.jpg")})
+    cb.res.setHeader("content-type", "image/jpeg")
+    cb.ajax("https://static.nfuca.com/plmm.jpg", undefined, { writeStream: cb.res })
+
+    return
+  }
 })

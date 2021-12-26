@@ -3,6 +3,7 @@ import * as https from 'https'
 import * as crypto from 'crypto'
 import * as zlib from 'zlib'
 import * as fs from 'fs'
+import * as stream from 'stream';
 
 // const MD5 = (str: string): string => crypto.createHash('md5').update(str).digest('hex')
 export type setCookie = {
@@ -122,10 +123,26 @@ class CB extends URL {
   }
   public ajax(
     url: string,
-    body: rawObject | Buffer | string = '',
-    options: http.RequestOptions & { json?: boolean } = {}
-  ): Promise<{ [x: string]: any } | string | Buffer> {
-    options.json = options.json ?? true
+    body: rawObject | Buffer | stream.Duplex | stream.Readable | string = '',
+    options: http.RequestOptions & { formatResult?: (body: Buffer, res: http.IncomingMessage, req: http.ClientRequest) => any | null, writeStream?: stream.Writable | stream.Duplex } = {}
+  ): Promise<any> {
+    if (options.formatResult === undefined) {
+      options.formatResult = (res2body, res2): Buffer | string | rawObject => {
+        if (res2.headers['content-type']) {
+          const contentType = String(res2.headers['content-type'])
+
+          if (contentType.includes("json")) {
+            return this.JSONparse(String(res2body))
+          }
+          if (contentType.includes("text")) {
+            return String(res2body)
+          }
+        } else if (/^((\{.*\})|(\[.*\]))$/.test(String(res2body).trim())) {
+          return this.JSONparse(String(res2body).trim()) || res2body
+        }
+        return res2body
+      }
+    }
     options.timeout = options.timeout ?? 10000
     const that = this
     const timer = setTimeout(() => {
@@ -145,35 +162,47 @@ class CB extends URL {
       (this.req.headers['user-agent'] ||
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36')
     if (body) {
-      if (typeof body === 'object' && !(body instanceof Buffer)) {
+      if (typeof body === 'object' && !(body instanceof Buffer) && !(body instanceof stream)) {
         const searchParams = new URLSearchParams()
         Object.entries(body).forEach(([key, value]) => searchParams.set(key, String(value)))
         body = String(searchParams)
-      }
-      if (!options.headers['content-type']) {
-        options.headers['content-type'] = 'application/x-www-form-urlencoded'
+        if (!options.headers['content-type']) {
+          options.headers['content-type'] = 'application/x-www-form-urlencoded'
+        }
       }
       options.method = options.method ?? 'post'
     }
-    return new Promise(resolve =>
-      (/^https/.test(url) ? https : http)
+    return new Promise(resolve => {
+      const req2 = (/^https/.test(url) ? https : http)
         .request(url, options, res2 => {
-          const res2chucks: Buffer[] = []
-          res2.on('error', errFn)
-          res2.on('data', chuck => res2chucks.push(chuck))
-          res2.on('end', () => {
-            const res2body = Buffer.concat(res2chucks)
-            clearTimeout(timer)
-            resolve(options.json ? that.JSONparse(String(res2body)) : res2body)
-          })
-        })
-        .on('error', errFn)
-        .end(body ? body : undefined)
-    )
+          if (options.writeStream) {
+            res2.pipe(options.writeStream)
+            res2.on("close", () => {
+              clearTimeout(timer)
+              resolve(res2.readableLength)
+            })
+          } else {
+            const res2chucks: Buffer[] = []
+            res2.on('error', errFn)
+            res2.on('data', chuck => res2chucks.push(chuck))
+            res2.on('end', () => {
+              const res2body = Buffer.concat(res2chucks)
+              clearTimeout(timer)
+              resolve(options.formatResult ? options.formatResult(res2body, res2, req2) : res2body)
+            })
+          }
+        });
+      req2.on('error', errFn)
+      if (body instanceof stream) {
+        body.pipe(req2)
+      } else {
+        req2.end(body ? body : undefined)
+      }
+    })
   }
 }
 export type rawObject = { [x: string]: any } | any[]
-export type routeCallbackRetrun = string | rawObject | null | undefined
+export type routeCallbackRetrun = string | rawObject | null | void
 export type webOpts = {
   api?: Map<string, (cb: CB) => Promise<routeCallbackRetrun>>
   timeout?: number
@@ -231,7 +260,6 @@ export default class Web {
         return
       }
       switch (typeof result) {
-        case 'undefined':
         case 'object':
           return cb.resEnd(JSON.stringify({ code: 0, data: result ?? null, msg: 'ok' }))
         case 'string':
