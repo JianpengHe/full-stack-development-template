@@ -66,5 +66,17 @@ web.route({
     /** 若指定状态码为3xx 则location到return的值 */
     cb.res.statusCode = 302;
     return "https://www.baidu.com"
-  }
+  },
+
+  async cookie(cb) {
+    /** 设置cookie，测试链接http://127.0.0.1/api/cookie?a=5&ff=ty */
+    for (const [key, value] of cb.searchParams) {
+      cb.cookie[key] = value
+    }
+    cb.cookie.test = {
+      value: "666",
+      expires: new Date("2022/1/1")
+    }
+    return {}
+  },
 })

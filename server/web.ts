@@ -7,7 +7,7 @@ import * as stream from 'stream';
 
 // const MD5 = (str: string): string => crypto.createHash('md5').update(str).digest('hex')
 export type setCookie = {
-  name: string
+  name?: string
   value: string
   domain?: string
   expires?: string | number | Date
@@ -22,7 +22,7 @@ class CB extends URL {
   public timer: NodeJS.Timeout
   public form: { [x: string]: string } = {}
   public reqData: Buffer = Buffer.alloc(0)
-  private cookieMap = new Map()
+  private cookieMap: Map<string, string> = new Map()
   public setCookie: setCookie[] = []
   constructor(req: http.IncomingMessage, res: http.ServerResponse, timeout: number = 30000) {
     super('http://' + (req.headers.host ?? '127.0.0.1') + (req.url ?? ''))
@@ -48,23 +48,23 @@ class CB extends URL {
         this.cookieMap.set(cookie.substring(0, index), cookie.substring(index + 1))
       })
   }
-  public cookie = new Proxy(this, {
+  public cookie: { [x: string]: string | setCookie } = (that => new Proxy({}, {
     get(target, key: string) {
-      return target.cookieMap.get(key)
+      return that.cookieMap.get(key)
     },
-    set(target, key: string, value: string | (setCookie & { name?: string })) {
+    set(target, key: string, value: string | setCookie) {
       if (typeof value === 'string') {
-        target.setCookie.push({ name: key, value, path: '/' })
+        that.setCookie.push({ name: key, value, path: '/' })
       } else {
         if (!value.name) {
           value.name = key
         }
-        target.setCookie.push(value)
+        that.setCookie.push(value)
       }
       // target.res.setHeader('set-cookie', `${key}=` + (typeof value === 'string' ? `${value} ;path=/` : ``))
       return true
     },
-  })
+  }))(this)
   public JSONparse(str: string) {
     try {
       return JSON.parse(str)
@@ -255,8 +255,13 @@ export default class Web {
         res.end('404')
         return
       }
+
       res.setHeader('content-type', 'application/json')
       const result = await this.api.get(route)?.call(this, cb, req, res)
+      if (cb.setCookie.length) {
+        cb.res.setHeader("Set-Cookie", cb.setCookie.map((cookie) => `${cookie.name}=${cookie.value}${cookie.domain ? `; Domain=${cookie.domain}` : ""}${cookie.expires ? `; Max-Age=${typeof cookie.expires === "object" ? Math.floor((Number(cookie.expires) - Number(new Date)) / 1000) : cookie.expires}` : ""}${cookie.path ? `; Path=${cookie.path}` : ""}${cookie.httpOnly ? `; httponly` : ""}${cookie.secure ? `; secure` : ""}`))
+      }
+
       if (res.writableEnded) {
         return
       }
