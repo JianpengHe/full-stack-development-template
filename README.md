@@ -37,3 +37,5 @@ ps:map文件部署时可以删除
 1、鉴于国情，该仓库开启了gitee同步，可以考虑使用gitee的地址，但可能存在同步延迟，请以GitHub上为准
 
 2、vscode推荐安装`TSLint`和`Prettier`，方便检查代码和代码格式化
+
+安装完成后打开任意ts文件，按快捷键`ctrl`+`shift`+`P`，输入`tslint.manageWorkspaceLibraryExecution`，选择第一个`Enable XXX`即可启用TSLint
