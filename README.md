@@ -4,11 +4,13 @@
 
 # 第一次使用
 
-克隆仓库：`git clone https://github.com/JianpengHe/full-stack-development-template.git`
+1、克隆仓库：`git clone https://github.com/JianpengHe/full-stack-development-template.git`
 
-切换目录：`cd full-stack-development-template`
+(若网络较慢可以试试`git clone https://gitee.com/jianpenghe/full-stack-development-template.git`)
 
-安装依赖：`yarn`
+2、切换目录：`cd full-stack-development-template`
+
+3、安装依赖：`yarn`
 
 # 日常使用
 
@@ -29,3 +31,9 @@
 3.命令行切换到`dist/server`目录，运行`node index.js`
 
 ps:map文件部署时可以删除
+
+# 更舒服的使用
+
+1、鉴于国情，该仓库开启了gitee同步，可以考虑使用gitee的地址，但可能存在同步延迟，请以GitHub上为准
+
+2、vscode推荐安装`TSLint`和`Prettier`，方便检查代码和代码格式化
