@@ -4,7 +4,12 @@
     "module": "commonjs", // 模块系统
     "target": "es2020", // 生成目标, 一般选择ES6，因为不是
     //"module": "ESNext",                       // 指定生成哪个模块系统代码
-    "lib": ["dom", "dom.iterable", "esnext", "es2016"], // 编译过程中需要引入的库文件的列表
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "es2016"
+    ], // 编译过程中需要引入的库文件的列表
     // // "allowJs": true, // 允许编译 js 文件
     "jsx": "react", // 在 .tsx 文件里支持 JSX
     "isolatedModules": true, // 提供额外的一些语法检查，如文件没有模块导出会报错
@@ -16,9 +21,15 @@
     "baseUrl": "./", // 根路径
     "paths": {
       // 路径映射，与 baseUrl 关联
-      "frontend/*": ["frontend/*"],
-      "components/*": ["frontend/components/*"],
-      "utils/*": ["frontend/utils/*"]
+      "frontend/*": [
+        "src/frontend/*"
+      ],
+      "components/*": [
+        "src/frontend/components/*"
+      ],
+      "utils/*": [
+        "src/frontend/utils/*"
+      ]
     },
     "noImplicitAny": false,
     "strictNullChecks": true,
@@ -33,13 +44,21 @@
     // 实验性选项
     // "experimentalDecorators": true, // 启用实验性的ES装饰器
     //  "emitDecoratorMetadata": true, // 给源码里的装饰器声明加上设计类型元数据
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     // 其他选项
     //  "forceConsistentCasingInFileNames": true, // 禁止对同一个文件的不一致的引用
     "skipLibCheck": true, // 忽略所有的声明文件（ *.d.ts）的类型检查
     "allowSyntheticDefaultImports": true // 允许从没有设置默认导出的模块中默认导入
     //   "noEmit": true // 只想使用tsc的类型检查作为函数时（当其他工具（例如Babel实际编译）时）使用它
   },
-  "include": ["./server/*.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts", "*.js"]
+  "include": [
+    "src/server/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "*.js"
+  ]
 }

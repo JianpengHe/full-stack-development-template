@@ -3,7 +3,6 @@
   // for thedocumentation about the tasks.json format
   "version": "2.0.0",
   "command": "tsc",
-  //-p 指定目录；-w watch,检测文件改变自动编译
   "args": [
     "-p",
     ".",
@@ -19,7 +18,23 @@
         "$tsc-watch"
       ],
       "group": "build",
-      "label": "启用tsc监视（自动监听文件变化&编译后端typescript）"
+      "label": "【后端】启用tsc监视",
+      "detail": "自动监听文件变化&编译typescript，只编译不执行！"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "label": "【前端】启动开发环境",
+      "detail": "启动webpack"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "打包构建前后端",
+      "detail": "打包编译构建前后端全部代码到dist目录"
     }
   ]
 }

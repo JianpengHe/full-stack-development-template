@@ -45,7 +45,7 @@ const getCssLoaders = () => {
 
 module.exports = {
   entry: {
-    app: path.resolve(PROJECT_PATH, './frontend/index.tsx'),
+    app: path.resolve(PROJECT_PATH, './src/frontend/index.tsx'),
   },
   module: {
     rules: [
@@ -105,7 +105,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(PROJECT_PATH, './public/index.html'),
+      template: path.resolve(PROJECT_PATH, './src/public/index.html'),
     }),
     new WebpackBar({
       name: '编译',

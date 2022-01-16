@@ -21,6 +21,10 @@ module.exports = merge(common, {
     open: true,
     hot: true,
     noInfo: true,
+    proxy: {
+      '/api': 'http://localhost:80'
+    }
+
   },
   plugins: [
     // 实际上只开启 hot：true 就会自动识别有无声明该插件，没有则自动引入，但是怕有隐藏问题这里还是手动加上了
