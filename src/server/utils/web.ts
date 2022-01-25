@@ -3,8 +3,9 @@ import * as https from 'https'
 import * as crypto from 'crypto'
 import * as zlib from 'zlib'
 import * as fs from 'fs'
-import * as stream from 'stream';
-
+import * as stream from 'stream'
+import IServerTypes from '../typings/api'
+import routeMap from '../typings/api/route'
 // const MD5 = (str: string): string => crypto.createHash('md5').update(str).digest('hex')
 export type setCookie = {
   name?: string
@@ -15,7 +16,7 @@ export type setCookie = {
   secure?: string
   httpOnly?: boolean
 }
-class CB extends URL {
+export class CB extends URL {
   public query: { [x: string]: string } = {}
   public req: http.IncomingMessage
   public res: http.ServerResponse
@@ -48,23 +49,27 @@ class CB extends URL {
         this.cookieMap.set(cookie.substring(0, index), cookie.substring(index + 1))
       })
   }
-  public cookie: { [x: string]: string | setCookie } = (that => new Proxy({}, {
-    get(target, key: string) {
-      return that.cookieMap.get(key)
-    },
-    set(target, key: string, value: string | setCookie) {
-      if (typeof value === 'string') {
-        that.setCookie.push({ name: key, value, path: '/' })
-      } else {
-        if (!value.name) {
-          value.name = key
-        }
-        that.setCookie.push(value)
+  public cookie: { [x: string]: string | setCookie } = (that =>
+    new Proxy(
+      {},
+      {
+        get(_, key: string) {
+          return that.cookieMap.get(key)
+        },
+        set(_, key: string, value: string | setCookie) {
+          if (typeof value === 'string') {
+            that.setCookie.push({ name: key, value, path: '/' })
+          } else {
+            if (!value.name) {
+              value.name = key
+            }
+            that.setCookie.push(value)
+          }
+          // target.res.setHeader('set-cookie', `${key}=` + (typeof value === 'string' ? `${value} ;path=/` : ``))
+          return true
+        },
       }
-      // target.res.setHeader('set-cookie', `${key}=` + (typeof value === 'string' ? `${value} ;path=/` : ``))
-      return true
-    },
-  }))(this)
+    ))(this)
   public JSONparse(str: string) {
     try {
       return JSON.parse(str)
@@ -124,17 +129,20 @@ class CB extends URL {
   public ajax(
     url: string,
     body: rawObject | Buffer | stream.Duplex | stream.Readable | string = '',
-    options: http.RequestOptions & { formatResult?: (body: Buffer, res: http.IncomingMessage, req: http.ClientRequest) => any | null, writeStream?: stream.Writable | stream.Duplex } = {}
+    options: http.RequestOptions & {
+      formatResult?: (body: Buffer, res: http.IncomingMessage, req: http.ClientRequest) => any | null
+      writeStream?: stream.Writable | stream.Duplex
+    } = {}
   ): Promise<any> {
     if (options.formatResult === undefined) {
       options.formatResult = (res2body, res2): Buffer | string | rawObject => {
         if (res2.headers['content-type']) {
           const contentType = String(res2.headers['content-type'])
 
-          if (contentType.includes("json")) {
+          if (contentType.includes('json')) {
             return this.JSONparse(String(res2body))
           }
-          if (contentType.includes("text")) {
+          if (contentType.includes('text')) {
             return String(res2body)
           }
         } else if (/^((\{.*\})|(\[.*\]))$/.test(String(res2body).trim())) {
@@ -173,25 +181,24 @@ class CB extends URL {
       options.method = options.method ?? 'post'
     }
     return new Promise(resolve => {
-      const req2 = (/^https/.test(url) ? https : http)
-        .request(url, options, res2 => {
-          if (options.writeStream) {
-            res2.pipe(options.writeStream)
-            res2.on("close", () => {
-              clearTimeout(timer)
-              resolve(res2.readableLength)
-            })
-          } else {
-            const res2chucks: Buffer[] = []
-            res2.on('error', errFn)
-            res2.on('data', chuck => res2chucks.push(chuck))
-            res2.on('end', () => {
-              const res2body = Buffer.concat(res2chucks)
-              clearTimeout(timer)
-              resolve(options.formatResult ? options.formatResult(res2body, res2, req2) : res2body)
-            })
-          }
-        });
+      const req2 = (/^https/.test(url) ? https : http).request(url, options, res2 => {
+        if (options.writeStream) {
+          res2.pipe(options.writeStream)
+          res2.on('close', () => {
+            clearTimeout(timer)
+            resolve(res2.readableLength)
+          })
+        } else {
+          const res2chucks: Buffer[] = []
+          res2.on('error', errFn)
+          res2.on('data', chuck => res2chucks.push(chuck))
+          res2.on('end', () => {
+            const res2body = Buffer.concat(res2chucks)
+            clearTimeout(timer)
+            resolve(options.formatResult ? options.formatResult(res2body, res2, req2) : res2body)
+          })
+        }
+      })
       req2.on('error', errFn)
       if (body instanceof stream) {
         body.pipe(req2)
@@ -203,7 +210,12 @@ class CB extends URL {
 }
 export type rawObject = { [x: string]: any } | any[]
 export type routeCallbackRetrun = string | rawObject | null | undefined
-export type routeCallbackFn = (cb: CB, req: http.IncomingMessage, res: http.ServerResponse) => Promise<routeCallbackRetrun>
+export type routeCallbackFn = (
+  reqData: { path?: any; query?: any; body?: any; headers?: any; cookie?: any },
+  cb: CB,
+  req: http.IncomingMessage,
+  res: http.ServerResponse
+) => Promise<routeCallbackRetrun>
 export type webOpts = {
   api?: Map<string, routeCallbackFn>
   timeout?: number
@@ -215,11 +227,11 @@ export type webOpts = {
   sessionLife?: number
 }
 export default class Web {
-  public api: Map<string, routeCallbackFn>
+  public api: Map<string, { path: string; route: string; method: string; cb: routeCallbackFn | null }>
   public timeout: number
   public port: number
   public rootDir: string
-  public apiPrefix: string
+  // public apiPrefix: string
   public httpServer: http.Server
   public sessionName: string
   public sessionLife: number
@@ -227,7 +239,7 @@ export default class Web {
     this.timeout = opts.timeout ?? 30000
     this.port = opts.port || 80
     this.rootDir = opts.rootDir ?? __dirname + '/../frontend'
-    this.apiPrefix = opts.apiPrefix ?? '/api/'
+    // this.apiPrefix = opts.apiPrefix ?? '/api/'
     this.httpServer = opts.httpServer || http.createServer()
     if (!opts.httpServer) {
       this.httpServer.listen(this.port)
@@ -237,8 +249,15 @@ export default class Web {
     this.httpServer.on('request', (req: http.IncomingMessage, res: http.ServerResponse) => this.request(req, res))
     this.api = opts.api ?? new Map()
   }
-  public route(route: { [x: string]: routeCallbackFn }) {
-    Object.entries(route).forEach(([path, cb]) => this.api.set(path, cb))
+  public route(route: IServerTypes) {
+    Object.entries(route).forEach(([path, cb]) => {
+      const routeInfo = routeMap.get(path)
+      if (!routeInfo) {
+        throw new Error('未找到该接口定义')
+      }
+      routeInfo.cb = cb
+      this.api.set(routeInfo.route, routeInfo)
+    })
     return this
   }
   public async request(req: http.IncomingMessage, res: http.ServerResponse) {
@@ -247,34 +266,78 @@ export default class Web {
       /*req.method === 'post'*/
       await cb.getReqData()
     }
-    if (cb.pathname.indexOf(this.apiPrefix) === 0) {
+    const route = req.method?.toLowerCase() + cb.pathname
+    if (this.api.has(route)) {
       /** api路由 */
-      const route = cb.pathname.substring(this.apiPrefix.length)
-      if (!this.api.has(route)) {
-        res.writeHead(404)
-        res.end('404')
-        return
+      let result
+      try {
+        result = await this.api.get(route)?.cb?.call(
+          this,
+          {
+            query: new Proxy(
+              {},
+              {
+                get(_, key) {
+                  return cb.searchParams.get(String(key))
+                },
+              }
+            ),
+            path: null,
+            body: cb.form,
+            headers: req.headers,
+            cookie: cb.cookie,
+          },
+          cb,
+          req,
+          res
+        )
+      } catch (e: any) {
+        if (e instanceof Error && e.constructor !== Error) {
+          res.statusCode = 500
+          result = '服务器错误'
+          console.log(e)
+        } else {
+          res.statusCode = 406
+          result = e
+        }
       }
 
-      res.setHeader('content-type', 'application/json')
-      const result = await this.api.get(route)?.call(this, cb, req, res)
       if (cb.setCookie.length) {
-        cb.res.setHeader("Set-Cookie", cb.setCookie.map((cookie) => `${cookie.name}=${cookie.value}${cookie.domain ? `; Domain=${cookie.domain}` : ""}${cookie.expires ? `; Max-Age=${typeof cookie.expires === "object" ? Math.floor((Number(cookie.expires) - Number(new Date)) / 1000) : cookie.expires}` : ""}${cookie.path ? `; Path=${cookie.path}` : ""}${cookie.httpOnly ? `; httponly` : ""}${cookie.secure ? `; secure` : ""}`))
+        cb.res.setHeader(
+          'Set-Cookie',
+          cb.setCookie.map(
+            cookie =>
+              `${cookie.name}=${cookie.value}${cookie.domain ? `; Domain=${cookie.domain}` : ''}${
+                cookie.expires
+                  ? `; Max-Age=${
+                      typeof cookie.expires === 'object'
+                        ? Math.floor((Number(cookie.expires) - Number(new Date())) / 1000)
+                        : cookie.expires
+                    }`
+                  : ''
+              }${cookie.path ? `; Path=${cookie.path}` : ''}${cookie.httpOnly ? `; httponly` : ''}${
+                cookie.secure ? `; secure` : ''
+              }`
+          )
+        )
       }
 
       if (res.writableEnded) {
         return
       }
-      switch (typeof result) {
-        case 'object':
-          return cb.resEnd(JSON.stringify({ code: 0, data: result ?? null, msg: 'ok' }))
-        case 'string':
-          if (/^3/.test(String(res.statusCode || ''))) {
-            res.setHeader('location', result)
-            res.end('正在跳转')
-            return
-          }
-          return cb.resEnd(JSON.stringify({ code: -6, data: null, msg: result }), 403)
+
+      if (res.statusCode >= 500) {
+        cb.resEnd(result)
+      } else if (/^3/.test(String(res.statusCode || ''))) {
+        res.setHeader('location', result)
+        cb.resEnd('正在跳转')
+        return
+      }
+      if (typeof result === 'object') {
+        res.setHeader('content-type', 'application/json')
+        cb.resEnd(JSON.stringify(result))
+      } else if (result !== undefined) {
+        cb.resEnd(String(result))
       }
     } else {
       /** 静态文件路由 */

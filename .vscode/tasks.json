@@ -2,21 +2,12 @@
   // See https://go.microsoft.com/fwlink/?LinkId=733558
   // for thedocumentation about the tasks.json format
   "version": "2.0.0",
-  "command": "tsc",
-  "args": [
-    "-p",
-    ".",
-    "-w"
-  ],
-  "problemMatcher": "$tsc",
   "tasks": [
     {
       "type": "typescript",
       "tsconfig": "tsconfig.json",
       "option": "watch",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "group": "build",
       "label": "【后端】启用tsc监视",
       "detail": "自动监听文件变化&编译typescript，只编译不执行！"
@@ -35,6 +26,13 @@
       "problemMatcher": [],
       "label": "打包构建前后端",
       "detail": "打包编译构建前后端全部代码到dist目录"
+    },
+    {
+      "type": "npm",
+      "script": "pont",
+      "problemMatcher": [],
+      "label": "生成接口定义",
+      "detail": "生成前后端接口定义文件"
     }
   ]
 }
