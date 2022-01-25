@@ -47,10 +47,9 @@ web.route({
   async GetCurlXxt(_, cb) {
     /** body允许直接传入一个对象，将格式化成表单post到对方服务器 */
     return {
-      data: await cb.ajax('http://passport2.chaoxing.com/login', {
-        uname: 'MTEx',
-        password: 'MTEx',
-        numcode: 1111,
+      data: await cb.ajax('http://passport2.chaoxing.com/fanyalogin', {
+        uname: "123",
+        password: "123"
       }),
     }
   },
