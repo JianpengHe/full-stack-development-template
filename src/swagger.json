@@ -1,1 +1,369 @@
-{"swagger":"2.0","info":{"description":"","title":"T","version":""},"tags":[{"name":"TEST","description":"TEST"},{"name":"websocket","description":"websocket"},{"name":"curl","description":"curl"}],"paths":{"/test/hello-world-by-id":{"get":{"operationId":"gettesthelloWorldById","tags":["TEST"],"summary":"test","description":"","consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"id","description":"","in":"query","type":"string","default":"srting","required":true}],"responses":{"200":{"description":"","schema":{"type":"object","title":"empty object","properties":{"id":{"type":"string"}}}},"406":{"description":"throw error","schema":{"type":"string"}}}}},"/websocket":{"get":{"operationId":"getwebsocket","tags":["websocket"],"summary":"websocket","description":"","consumes":["application/json"],"produces":["application/json"],"parameters":[],"responses":{"200":{"description":"","schema":{"type":"string"}},"406":{"description":"","schema":{"type":"string"}}}}},"/test/postFromData":{"post":{"operationId":"posttestpostFromData","tags":["TEST"],"summary":"post","description":"","consumes":["application/json"],"produces":["application/json"],"parameters":[{"in":"body","name":"body","required":true,"schema":{"type":"object","title":"empty object","properties":{}}}],"responses":{"200":{"description":"","schema":{"type":"object","title":"empty object","properties":{"id":{"type":"number"},"name":{"type":"string"}}}}}}},"/curl/maoYan":{"get":{"operationId":"getcurlmaoYan","tags":["curl"],"summary":"maoyan","description":"","consumes":["application/json"],"produces":["application/json"],"parameters":[],"responses":{"200":{"description":"","schema":{"type":"array","items":{"type":"object","properties":{"movieName":{"type":"string"},"releaseInfo":{"type":"string"},"sumSplitBoxDesc":{"type":"string"}}}}}}}},"/curl/xxt":{"get":{"operationId":"getcurlxxt","tags":["curl"],"summary":"xxt","description":"","consumes":["application/json"],"produces":["application/json"],"parameters":[],"responses":{"200":{"description":"","schema":{"type":"object","properties":{"data":{"type":"string"}}}}}}},"/curl/img":{"get":{"operationId":"getcurlimg","tags":["curl"],"summary":"获取图片","description":"","consumes":["application/json"],"produces":["application/json"],"parameters":[],"responses":{"200":{"description":"","schema":{}}}}}},"definitions":{},"basePath":"/api"}
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "接口定义测试文件",
+    "version": "2.1.0",
+    "title": "PGTool"
+  },
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "TestAPI",
+      "description": "TEST somethings"
+    },
+    {
+      "name": "websocket",
+      "description": "websocket API"
+    },
+    {
+      "name": "curl",
+      "description": "爬虫"
+    },
+    {
+      "name": "Account",
+      "description": "个人中心"
+    }
+  ],
+  "paths": {
+    "/test/hello-world-by-id": {
+      "get": {
+        "tags": [
+          "TestAPI"
+        ],
+        "summary": "test",
+        "description": "",
+        "operationId": "gettesthelloWorldById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "default": "srting"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/empty object"
+            }
+          }
+        }
+      }
+    },
+    "/websocket": {
+      "get": {
+        "tags": [
+          "websocket"
+        ],
+        "summary": "websocket",
+        "description": "",
+        "operationId": "getwebsocket",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/test/postFromData": {
+      "post": {
+        "tags": [
+          "TestAPI"
+        ],
+        "summary": "post",
+        "description": "",
+        "operationId": "posttestpostFromData",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "age",
+            "in": "formData",
+            "required": false,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/inline_response_200"
+            }
+          }
+        }
+      }
+    },
+    "/test/postJsonData": {
+      "post": {
+        "tags": [
+          "TestAPI"
+        ],
+        "summary": "post",
+        "description": "",
+        "operationId": "posttestpostJsonData",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/body"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/inline_response_200_1"
+            }
+          }
+        }
+      }
+    },
+    "/curl/maoYan": {
+      "get": {
+        "tags": [
+          "curl"
+        ],
+        "summary": "获取猫眼票房",
+        "description": "",
+        "operationId": "getcurlmaoYan",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/inline_response_200_2"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/curl/xxt": {
+      "get": {
+        "tags": [
+          "curl"
+        ],
+        "summary": "xxt",
+        "description": "",
+        "operationId": "getcurlxxt",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/inline_response_200_3"
+            }
+          }
+        }
+      }
+    },
+    "/curl/img": {
+      "get": {
+        "tags": [
+          "curl"
+        ],
+        "summary": "获取图片",
+        "description": "",
+        "operationId": "getcurlimg",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {}
+          }
+        }
+      }
+    },
+    "/account/login": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "登录",
+        "description": "",
+        "operationId": "postaccountlogin",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "pwd",
+            "in": "formData",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/account/info": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "获取用户信息",
+        "description": "",
+        "operationId": "getaccountinfo",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/inline_response_200_4"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "empty object": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "inline_response_200": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "age": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "inline_response_200_1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "age": {
+          "type": "number"
+        }
+      }
+    },
+    "inline_response_200_2": {
+      "type": "object",
+      "properties": {
+        "movieName": {
+          "type": "string"
+        },
+        "releaseInfo": {
+          "type": "string"
+        },
+        "sumSplitBoxDesc": {
+          "type": "string"
+        }
+      }
+    },
+    "inline_response_200_3": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string"
+        }
+      }
+    },
+    "inline_response_200_4": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

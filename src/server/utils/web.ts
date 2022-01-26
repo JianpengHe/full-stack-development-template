@@ -22,6 +22,7 @@ export class CB extends URL {
   public res: http.ServerResponse
   public timer: NodeJS.Timeout
   public form: { [x: string]: string } = {}
+  public json: { [x: string]: string } = {}
   public reqData: Buffer = Buffer.alloc(0)
   private cookieMap: Map<string, string> = new Map()
   public setCookie: setCookie[] = []
@@ -121,6 +122,8 @@ export class CB extends URL {
             (obj, [key, value]) => Object.assign(obj, { [key]: value }),
             this.form
           )
+        } else if (this.req.headers['content-type']?.includes('json')) {
+          this.json = this.JSONparse(String(this.reqData).trim())
         }
         resolve(this.reqData)
       })
@@ -283,7 +286,7 @@ export default class Web {
               }
             ),
             path: null,
-            body: cb.form,
+            body: { ...cb.form, ...cb.json },
             headers: req.headers,
             cookie: cb.cookie,
           },

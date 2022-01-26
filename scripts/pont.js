@@ -1,4 +1,4 @@
-const { gen, genDirWithPaths } = require('openapi-gen-typescript')
+const { gen, genDirWithPaths } = require('./openapi-gen-typescript')
 const path = require('path')
 const fs = require('fs')
 const http = require('http')
@@ -37,6 +37,7 @@ fs.readFile('pont-info.json', (err, data) => {
   }
   deleteFolderRecursive(path.join(Path, 'src/frontend/typings/api'))
   deleteFolderRecursive(path.join(Path, 'src/server/typings/api'))
+  fs.mkdirSync(path.join(Path, 'src/frontend/typings/api'))
   fs.mkdirSync(path.join(Path, 'src/server/typings/api'))
   console.log('获取数据')
   Promise.all(

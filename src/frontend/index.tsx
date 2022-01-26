@@ -1,11 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import App from './app'
 import 'antd/dist/antd.css'
+import zhCN from 'antd/lib/locale-provider/zh_CN'
+import { ConfigProvider, Layout } from 'antd'
+import MainMenu from './MainMenu'
+import MainPage from './MainPage'
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <ConfigProvider locale={zhCN}>
+    <Layout>
+      <MainMenu />
+      <MainPage />
+    </Layout>
+  </ConfigProvider>,
   document.getElementById('root')
 )
 

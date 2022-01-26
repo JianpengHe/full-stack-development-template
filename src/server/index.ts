@@ -22,9 +22,9 @@ web.route({
     return 'Please use the websocket protocol.'
   },
   async GetTestHelloWorldById({ query }, cb) {
-    return { id: query.id }
-    /** 若没有值需要返回，可以返回空对象 */
-    return {}
+    // return { id: query.id }
+    // /** 若没有值需要返回，可以返回空对象 */
+    // return {}
 
     /** 返回错误信息 */
     throw 'some error'
@@ -41,15 +41,26 @@ web.route({
     cb.res.statusCode = 302
     return 'https://www.baidu.com'
   },
-  async PostTestPostFromData({ body }, cb) {
-    return body
+  async PostTestPostFromData({ body: { name, age }, query: { id } }) {
+    return {
+      id: Number(id),
+      name,
+      age,
+    }
+  },
+  async PostTestPostJsonData({ body, query }) {
+    return {
+      id: Number(query.id),
+      age: body.age,
+      name: body.name,
+    }
   },
   async GetCurlXxt(_, cb) {
     /** body允许直接传入一个对象，将格式化成表单post到对方服务器 */
     return {
       data: await cb.ajax('http://passport2.chaoxing.com/fanyalogin', {
-        uname: "123",
-        password: "123"
+        uname: '123',
+        password: '123',
       }),
     }
   },
@@ -76,5 +87,15 @@ web.route({
 
     /** 也可以指定一个可写流，当数据接收完毕promise将被解决，返回数据大小 */
     cb.ajax('https://static.nfuca.com/plmm.jpg', undefined, { writeStream: fs.createWriteStream('plmm.jpg') })
+  },
+
+  async GetAccountInfo() {
+    return { userId: 0, userName: '' }
+  },
+  async PostAccountLogin({ body: { user, pwd } }) {
+    if (user !== 'admin' || pwd !== '123') {
+      throw '账号密码错误'
+    }
+    return 'ok'
   },
 })
